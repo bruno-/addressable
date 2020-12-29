@@ -1368,7 +1368,7 @@ module Addressable
     # use a similar URI form:
     # <code>//<user>:<password>@<host>:<port>/<url-path></code>
     def self.ip_based_schemes
-      return self.port_mapping.keys
+      @ip_based_schemes ||= self.port_mapping.keys
     end
 
     # Returns a hash of common IP-based schemes and their default port
