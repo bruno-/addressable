@@ -64,6 +64,7 @@ module Addressable
     end
 
     SLASH = '/'
+    SLASH_SLASH = '//'
     EMPTY_STR = ''
 
     SCHEME_REGEX = /\A[a-z][a-z0-9\.\+\-]*\z/i
@@ -2475,7 +2476,7 @@ module Addressable
           "Cannot have a relative path with an authority set: '#{self.to_s}'"
       end
       if self.path != nil && !self.path.empty? &&
-          self.path[0..1] == SLASH + SLASH && self.authority == nil
+          self.path.start_with?(SLASH_SLASH) && self.authority == nil
         raise InvalidURIError,
           "Cannot have a path with two leading slashes " +
           "without an authority set: '#{self.to_s}'"
