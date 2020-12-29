@@ -908,7 +908,7 @@ module Addressable
       elsif new_scheme
         new_scheme = new_scheme.to_str
       end
-      if new_scheme && new_scheme !~ SCHEME_REGEX
+      if new_scheme && !new_scheme.match?(SCHEME_REGEX)
         raise InvalidURIError, "Invalid scheme format: '#{new_scheme}'"
       end
       @scheme = new_scheme
