@@ -1127,13 +1127,14 @@ module Addressable
     def normalized_host
       return nil unless self.host
       @normalized_host ||= begin
-        if !self.host.strip.empty?
+        host = self.host.strip
+        if !host.empty?
           result = ::Addressable::IDNA.to_ascii(
-            URI.unencode_component(self.host.strip.downcase)
+            URI.unencode_component(host.downcase)
           )
-          if result =~ /[^\.]\.$/
+          if result.match?(/[^\.]\.$/)
             # Single trailing dots are unnecessary.
-            result = result[0...-1]
+            result.chop!
           end
           result = Addressable::URI.normalize_component(
             result,

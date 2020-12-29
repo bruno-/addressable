@@ -22,6 +22,8 @@ require "idn"
 
 module Addressable
   module IDNA
+    DOT = "."
+
     def self.punycode_encode(value)
       IDN::Punycode.encode(value.to_s)
     end
@@ -35,7 +37,7 @@ module Addressable
     end
 
     def self.to_ascii(value)
-      value.to_s.split('.', -1).map do |segment|
+      value.to_s.split(DOT, -1).map do |segment|
         if segment.size > 0 && segment.size < 64
           IDN::Idna.toASCII(segment, IDN::Idna::ALLOW_UNASSIGNED)
         elsif segment.size >= 64
@@ -43,11 +45,11 @@ module Addressable
         else
           ''
         end
-      end.join('.')
+      end.join(DOT)
     end
 
     def self.to_unicode(value)
-      value.to_s.split('.', -1).map do |segment|
+      value.to_s.split(DOT, -1).map do |segment|
         if segment.size > 0 && segment.size < 64
           IDN::Idna.toUnicode(segment, IDN::Idna::ALLOW_UNASSIGNED)
         elsif segment.size >= 64
@@ -55,7 +57,7 @@ module Addressable
         else
           ''
         end
-      end.join('.')
+      end.join(DOT)
     end
   end
 end
