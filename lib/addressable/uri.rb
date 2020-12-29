@@ -2470,7 +2470,7 @@ module Addressable
           raise InvalidURIError, "Hostname not supplied: '#{self.to_s}'"
         end
       end
-      if self.path != nil && !self.path.empty? && self.path[0..0] != SLASH &&
+      if self.path != nil && !self.path.empty? && !self.path.start_with?(SLASH) &&
           self.authority != nil
         raise InvalidURIError,
           "Cannot have a relative path with an authority set: '#{self.to_s}'"
