@@ -112,7 +112,7 @@ module Addressable
       # convert it to a string, then parse the string.
       # We do the check this way because we don't want to accidentally
       # cause a missing constant exception to be thrown.
-      if uri.class.name =~ /^URI\b/
+      if uri.class.name.match?(/^URI\b/)
         uri = uri.to_s
       end
 
@@ -189,7 +189,7 @@ module Addressable
       # convert it to a string, then parse the string.
       # We do the check this way because we don't want to accidentally
       # cause a missing constant exception to be thrown.
-      if uri.class.name =~ /^URI\b/
+      if uri.class.name.match?(/^URI\b/)
         uri = uri.to_s
       end
 
@@ -895,7 +895,7 @@ module Addressable
     def normalized_scheme
       return nil unless self.scheme
       @normalized_scheme ||= begin
-        if self.scheme =~ /^\s*ssh\+svn\s*$/i
+        if self.scheme.match?(/^\s*ssh\+svn\s*$/i)
           "svn+ssh".dup
         else
           Addressable::URI.normalize_component(
@@ -949,7 +949,7 @@ module Addressable
       return nil unless self.user
       return @normalized_user if defined?(@normalized_user)
       @normalized_user ||= begin
-        if normalized_scheme =~ /https?/ && self.user.strip.empty? &&
+        if normalized_scheme.match?(/https?/) && self.user.strip.empty? &&
             (!self.password || self.password.strip.empty?)
           nil
         else
@@ -1006,7 +1006,7 @@ module Addressable
       return nil unless self.password
       return @normalized_password if defined?(@normalized_password)
       @normalized_password ||= begin
-        if self.normalized_scheme =~ /https?/ && self.password.strip.empty? &&
+        if self.normalized_scheme.match?(/https?/) && self.password.strip.empty? &&
             (!self.user || self.user.strip.empty?)
           nil
         else
@@ -1429,7 +1429,7 @@ module Addressable
         raise InvalidURIError, "Invalid encoding in port"
       end
 
-      if new_port != nil && !(new_port.to_s =~ /^\d+$/)
+      if new_port != nil && !(new_port.to_s.match?(/^\d+$/))
         raise InvalidURIError,
           "Invalid port number: #{new_port.inspect}"
       end
@@ -2359,7 +2359,7 @@ module Addressable
     # @return [String] The URI's <code>String</code> representation.
     def to_s
       if self.scheme == nil && self.path != nil && !self.path.empty? &&
-          self.path =~ NORMPATH
+          self.path.match?(NORMPATH)
         raise InvalidURIError,
           "Cannot assemble URI string with ambiguous path: '#{self.path}'"
       end
@@ -2507,7 +2507,7 @@ module Addressable
       end
       unreserved = CharacterClasses::UNRESERVED
       sub_delims = CharacterClasses::SUB_DELIMS
-      if !self.host.nil? && (self.host =~ /[<>{}\/\\\?\#\@"[[:space:]]]/ ||
+      if !self.host.nil? && (self.host.match?(/[<>{}\/\\\?\#\@"[[:space:]]]/) ||
           (self.host[/^\[(.*)\]$/, 1] != nil && self.host[/^\[(.*)\]$/, 1] !~
           Regexp.new("^[#{unreserved}#{sub_delims}:]*$")))
         raise InvalidURIError, "Invalid character in host: '#{self.host.to_s}'"
