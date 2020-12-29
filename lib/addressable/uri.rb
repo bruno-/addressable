@@ -1865,6 +1865,7 @@ module Addressable
       validate()
     end
 
+    IP_BASED_SCHEME_REGEX = /\A[[:space:]]*(?:#{Regexp.union(URI.ip_based_schemes).source})[[:space:]]*\z/i
     ##
     # Determines if the scheme indicates an IP-based protocol.
     #
@@ -1873,8 +1874,7 @@ module Addressable
     #   <code>false</code> otherwise.
     def ip_based?
       if self.scheme
-        return URI.ip_based_schemes.include?(
-          self.scheme.strip.downcase)
+        return self.scheme.match?(IP_BASED_SCHEME_REGEX)
       end
       return false
     end
