@@ -66,6 +66,10 @@ module Addressable
     SLASH = '/'
     SLASH_SLASH = '//'
     EMPTY_STR = ''
+    COLON = ':'
+    QUESTION_MARK = '?'
+    HASH = '#'
+    ENCODED_SLASH = "%2F"
 
     SCHEME_REGEX = /\A[a-z][a-z0-9\.\+\-]*\z/i
 
@@ -798,6 +802,7 @@ module Addressable
       end
     end
 
+    COMPONENTS = [:userinfo, :user, :password, :host, :port]
     ##
     # Creates a new uri object from component parts.
     #
@@ -819,7 +824,7 @@ module Addressable
     # @return [Addressable::URI] The constructed URI object.
     def initialize(options={})
       if options.has_key?(:authority)
-        if (options.keys & [:userinfo, :user, :password, :host, :port]).any?
+        if (options.keys & COMPONENTS).any?
           raise ArgumentError,
             "Cannot specify both an authority and any of the components " +
             "within the authority."
@@ -1535,6 +1540,7 @@ module Addressable
     end
 
     NORMPATH = /^(?!\/)[^\/:]*:.*$/
+    HTTP_OR_FTP = ["http", "https", "ftp", "tftp"]
     ##
     # The path component for this URI, normalized.
     #
@@ -1542,9 +1548,9 @@ module Addressable
     def normalized_path
       @normalized_path ||= begin
         path = self.path.to_s
-        if self.scheme == nil && path =~ NORMPATH
+        if self.scheme == nil && path.match?(NORMPATH)
           # Relative paths with colons in the first segment are ambiguous.
-          path = path.sub(":", "%2F")
+          path = path.sub(COLON, ENCODED_SLASH)
         end
         # String#split(delimeter, -1) uses the more strict splitting behavior
         # found by default in Python.
@@ -1557,7 +1563,7 @@ module Addressable
 
         result = URI.normalize_path(result)
         if result.empty? &&
-            ["http", "https", "ftp", "tftp"].include?(self.normalized_scheme)
+            HTTP_OR_FTP.include?(self.normalized_scheme)
           result = SLASH.dup
         end
         result
@@ -2354,11 +2360,23 @@ module Addressable
       end
       @uri_string ||= begin
         uri_string = String.new
-        uri_string << "#{self.scheme}:" if self.scheme != nil
-        uri_string << "//#{self.authority}" if self.authority != nil
+        if self.scheme != nil
+          uri_string << self.scheme
+          uri_string << COLON
+        end
+        if self.authority != nil
+          uri_string << SLASH_SLASH
+          uri_string << self.authority
+        end
         uri_string << self.path.to_s
-        uri_string << "?#{self.query}" if self.query != nil
-        uri_string << "##{self.fragment}" if self.fragment != nil
+        if self.query != nil
+          uri_string << QUESTION_MARK
+          uri_string << self.query
+        end
+        if self.fragment != nil
+          uri_string << HASH
+          uri_string << self.fragment
+        end
         uri_string.force_encoding(Encoding::UTF_8)
         uri_string
       end
