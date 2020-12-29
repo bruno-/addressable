@@ -474,14 +474,14 @@ module Addressable
       end
       uri = uri.dup
       # Seriously, only use UTF-8. I'm really not kidding!
-      uri.force_encoding("utf-8")
-      leave_encoded = leave_encoded.dup.force_encoding("utf-8")
+      uri.force_encoding(Encoding::UTF_8)
+      leave_encoded = leave_encoded.dup.force_encoding(Encoding::UTF_8)
       result = uri.gsub(/%[0-9a-f]{2}/iu) do |sequence|
         c = sequence[1..3].to_i(16).chr
-        c.force_encoding("utf-8")
+        c.force_encoding(Encoding::UTF_8)
         leave_encoded.include?(c) ? sequence : c
       end
-      result.force_encoding("utf-8")
+      result.force_encoding(Encoding::UTF_8)
       if return_type == String
         return result
       elsif return_type == ::Addressable::URI
