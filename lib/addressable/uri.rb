@@ -66,6 +66,8 @@ module Addressable
     SLASH = '/'
     EMPTY_STR = ''
 
+    SCHEME_REGEX = /\A[a-z][a-z0-9\.\+\-]*\z/i
+
     URIREGEX = /^(([^:\/?#]+):)?(\/\/([^\/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?$/
 
     PORT_MAPPING = {
@@ -906,7 +908,7 @@ module Addressable
       elsif new_scheme
         new_scheme = new_scheme.to_str
       end
-      if new_scheme && new_scheme !~ /\A[a-z][a-z0-9\.\+\-]*\z/i
+      if new_scheme && new_scheme !~ SCHEME_REGEX
         raise InvalidURIError, "Invalid scheme format: '#{new_scheme}'"
       end
       @scheme = new_scheme
