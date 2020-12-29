@@ -70,6 +70,8 @@ module Addressable
     QUESTION_MARK = '?'
     HASH = '#'
     ENCODED_SLASH = "%2F"
+    AT = "@"
+    EMPTY_REGEX = /\A[[:space:]]*\z/
 
     SCHEME_REGEX = /\A[a-z][a-z0-9\.\+\-]*\z/i
 
@@ -393,6 +395,7 @@ module Addressable
     #     "simple/example", Addressable::URI::CharacterClasses::UNRESERVED
     #   )
     #   => "simple%2Fexample"
+    STRING_OR_REGEXP = [String, Regexp]
     def self.encode_component(component, character_class=
         CharacterClasses::RESERVED + CharacterClasses::UNRESERVED,
         upcase_encoded='')
@@ -411,7 +414,7 @@ module Addressable
         raise TypeError, "Can't convert #{component.class} into String."
       end if !component.is_a? String
 
-      if ![String, Regexp].include?(character_class.class)
+      if !STRING_OR_REGEXP.include?(character_class.class)
         raise TypeError,
           "Expected String or Regexp, got #{character_class.inspect}"
       end
@@ -440,6 +443,7 @@ module Addressable
       alias_method :encode_component, :encode_component
     end
 
+    STRING_OR_URI = [String, ::Addressable::URI]
     ##
     # Unencodes any percent encoded characters within a URI component.
     # This method may be used for unencoding either components or full URIs,
@@ -471,7 +475,7 @@ module Addressable
       rescue NoMethodError, TypeError
         raise TypeError, "Can't convert #{uri.class} into String."
       end if !uri.is_a? String
-      if ![String, ::Addressable::URI].include?(return_type)
+      if !STRING_OR_URI.include?(return_type)
         raise TypeError,
           "Expected Class (String or Addressable::URI), " +
           "got #{return_type.inspect}"
@@ -556,7 +560,7 @@ module Addressable
         raise TypeError, "Can't convert #{component.class} into String."
       end if !component.is_a? String
 
-      if ![String, Regexp].include?(character_class.class)
+      if !STRING_OR_REGEXP.include?(character_class.class)
         raise TypeError,
           "Expected String or Regexp, got #{character_class.inspect}"
       end
@@ -803,6 +807,7 @@ module Addressable
     end
 
     COMPONENTS = [:userinfo, :user, :password, :host, :port]
+    USER_PASSWORD_COMPONENTS = [:user, :password]
     ##
     # Creates a new uri object from component parts.
     #
@@ -831,7 +836,7 @@ module Addressable
         end
       end
       if options.has_key?(:userinfo)
-        if (options.keys & [:user, :password]).any?
+        if (options.keys & USER_PASSWORD_COMPONENTS).any?
           raise ArgumentError,
             "Cannot specify both a userinfo and either the user or password."
         end
@@ -918,7 +923,7 @@ module Addressable
         raise InvalidURIError, "Invalid scheme format: '#{new_scheme}'"
       end
       @scheme = new_scheme
-      @scheme = nil if @scheme.to_s.strip.empty?
+      @scheme = nil if @scheme.to_s.match?(EMPTY_REGEX)
 
       # Reset dependent values
       remove_instance_variable(:@normalized_scheme) if defined?(@normalized_scheme)
@@ -1582,7 +1587,7 @@ module Addressable
         raise TypeError, "Can't convert #{new_path.class} into String."
       end
       @path = (new_path || EMPTY_STR).to_str
-      if !@path.empty? && @path[0..0] != SLASH && host != nil
+      if !@path.empty? && !@path.start_with?(SLASH) && host != nil
         @path = "/#{@path}"
       end
 
