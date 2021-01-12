@@ -467,6 +467,7 @@ module Addressable
     #   The unencoded component or URI.
     #   The return type is determined by the <code>return_type</code>
     #   parameter.
+    PERCENT_ENCODED_CHAR = /%[0-9a-f]{2}/iu
     def self.unencode(uri, return_type=String, leave_encoded='')
       return nil if uri.nil?
 
@@ -484,11 +485,12 @@ module Addressable
       # Seriously, only use UTF-8. I'm really not kidding!
       uri.force_encoding(Encoding::UTF_8)
       leave_encoded = leave_encoded.dup.force_encoding(Encoding::UTF_8)
-      result = uri.gsub(/%[0-9a-f]{2}/iu) do |sequence|
+      uri.gsub!(PERCENT_ENCODED_CHAR) do |sequence|
         c = sequence[1..3].to_i(16).chr
         c.force_encoding(Encoding::UTF_8)
         leave_encoded.include?(c) ? sequence : c
       end
+      result = uri
       result.force_encoding(Encoding::UTF_8)
       if return_type == String
         return result
